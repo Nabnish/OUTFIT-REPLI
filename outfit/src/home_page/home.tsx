@@ -15,6 +15,8 @@ export default function Home({theme} : homeProps) {
                     <motion.p>I</motion.p>
                     <motion.p>T</motion.p>
                 </div>
+                <motion.div className={`w-full h-2    ${theme==="#FF0000" ? "bg-[#FF0000]" : theme==="#000000" ? "bg-[#ECE9E4]" : "bg-[#000000]"} `}/>
+
                 
             </motion.div>
         </>
