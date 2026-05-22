@@ -11,10 +11,10 @@ export default function NavBar() {
 
     return (
         <>
-            <motion.div className="font-outfit text-3xl font-black grid grid-flow-col gap-2 place-content-between   absolute opacity-100 w-screen h-[10vh] p-5">
+            <motion.div initial={{y:-100, opacity:0}} animate={{y:0, opacity:100}} transition={{delay:1, duration:0.5}} className="font-outfit text-3xl font-black grid grid-flow-col gap-2 place-content-between   absolute opacity-100 w-screen h-[10vh] p-5">
                 <div className="text-6xl font-[1200] tracking-[-0.12em]  " style={{ color: theme }}>++</div>
-                <a className="font-normal place-self-center pl-235 " style={{ color: theme }} href="#">Shop</a>
-                <a className="font-normal  place-self-center" style={{ color: theme }} href="#">Bag</a>
+                <a className="font-normal place-self-center pl-235 tracking-[-0.05em] " style={{ color: theme }} href="#">Shop</a>
+                <a className="font-normal  place-self-center tracking-[-0.05em]" style={{ color: theme }} href="#">Bag</a>
                 <div className="grid grid-flow-col p-5  gap-1">
                     <button className={`rounded-full     w-5 h-5 bg-[#000000] border-1 ${ theme==="#000000" ? 'border-[#ECE9E4]' : "border-[#000000]" }`} onClick={() => handleSubmit("#000000")}></button>
                     <button className={`rounded-full w-5 h-5 bg-[#ECE9E4] border-1 ${ theme==="#000000" ? 'border-[#ECE9E4]' : "border-[#000000]" }`} onClick={() => handleSubmit("#ECE9E4")}></button>
