@@ -11,7 +11,7 @@ export default function NavBar({ theme, setTheme }: { theme: string; setTheme: (
 
     return (
         <>
-            <motion.div initial={{y:-100, opacity:0}} animate={{y:0, opacity:100}} transition={{delay:1.5, duration:0.5}} className={`font-outfit text-3xl font-black grid grid-flow-col gap-2 place-content-between absolute opacity-100 w-screen h-[10vh] p-5 ${theme==="#FF0000" ? "text-[#FF0000]" : theme==="#000000" ? "text-[#ECE9E4]" : "text-[#000000]"}`}>
+            <motion.div initial={{y:-100, opacity:0}} animate={{y:0, opacity:100}} transition={{delay:1.5, duration:0.5}} className={`font-outfit text-3xl font-black grid grid-flow-col gap-2 place-content-between fixed opacity-100 w-screen h-[10vh] p-5 ${theme==="#FF0000" ? "text-[#FF0000]" : theme==="#000000" ? "text-[#ECE9E4]" : "text-[#000000]"}`}>
                 <a className={`text-6xl font-[1200] tracking-[-0.12em] $`} href="#" >++</a>
                 <a className={`font-normal place-self-center pl-235 tracking-tighter underline `} href="#">Shop</a>
                 <a className={`font-normal  place-self-center tracking-tighter`}  href="#">Bag</a>

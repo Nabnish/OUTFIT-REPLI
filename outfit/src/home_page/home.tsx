@@ -1,4 +1,4 @@
-import { easeInOut, motion, px } from "motion/react"
+import { easeInOut, motion} from "motion/react"
 import image2 from "../assests/1.avif"
 import image3 from "../assests/2.avif"
 import image4 from "../assests/3.avif"
@@ -18,13 +18,11 @@ export default function Home({ theme }: homeProps) {
         }
     }
 
-    const childProps = {
-        hidden: {},
-        show: {}
-    }
+  
 
     return (
         <>
+        
             <motion.div initial={{ y: 1000 }} animate={{ y: 0 }} transition={{ duration: 1.5, ease: easeInOut }} className={`${theme === "#000000" ? "bg-[#000000]" : "bg-[#ECE9E4]"} w-screen h-fill mt-0 pt-0 p-5`}>
                 <div className={`grid grid-flow-col font-bold font-outfit text-[27rem] tracking-tight ${theme === "#FF0000" ? "text-[#FF0000]" : theme === "#000000" ? "text-[#ECE9E4]" : "text-[#000000]"}  leading-none pt-7`}>
                     <div>
@@ -68,6 +66,8 @@ export default function Home({ theme }: homeProps) {
                 </motion.div>
 
             </motion.div>
+            
+            
         </>
     );
 }
