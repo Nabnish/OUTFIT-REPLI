@@ -1,31 +1,32 @@
-import { easeInOut, motion, px } from "motion/react"
-import image2 from "../assests/1.avif"
-import image3 from "../assests/2.avif"
-import image4 from "../assests/3.avif"
-import image1 from "../assests/4.avif"
+import { easeInOut, motion } from "motion/react"
+import { useNavigate } from "react-router-dom"
+import { Data } from "../data/data"
+
 
 type homeProps = {
     theme: string;
 }
+
+
 export default function Home({ theme }: homeProps) {
+
+    const navigate = useNavigate();
+
     const text = "O U T F I T";
     const parentProps = {
         hidden: {},
         show: {
-            transistion: {
+            transition: {
                 staggerChildren: 2
             }
         }
     }
 
-    const childProps = {
-        hidden: {},
-        show: {}
-    }
+
 
     return (
         <>
-            <motion.div initial={{ y: 1000 }} animate={{ y: 0 }} transition={{ duration: 1.5, ease: easeInOut }} className={`${theme === "#000000" ? "bg-[#000000]" : "bg-[#ECE9E4]"} w-screen h-fill mt-0 pt-0 p-5`}>
+            <motion.div initial={{ y: 1000 }} animate={{ y: 0 }} transition={{ duration: 1.5, ease: easeInOut }} className={`${theme === "#000000" ? "bg-[#000000]" : "bg-[#ECE9E4]"} w-fill h-fill mt-0 pt-0 p-5`}>
                 <div className={`grid grid-flow-col font-bold font-outfit text-[27rem] tracking-tight ${theme === "#FF0000" ? "text-[#FF0000]" : theme === "#000000" ? "text-[#ECE9E4]" : "text-[#000000]"}  leading-none pt-7`}>
                     <div>
                         <motion.p variants={parentProps} initial="hidden" animate="show">
@@ -47,24 +48,21 @@ export default function Home({ theme }: homeProps) {
                         <p className=" tracking-tighter pt-5">Created by the ++hellohello team, this store and signature collection celebrates our collective creativity and passion for apparel. Carefully designed.</p>
                     </div>
                     <div className="grid  text-nowrap -mr-40 ">
-                        <span>Visit ++ website</span>
-                        <a>Shipping & Returns</a>
+                        <a href="#">Visit ++ website</a>
+                        <a href="#">Shipping & Returns</a>
                     </div>
                     <div className="pl-10 text-nowrap mr-5">© 2026</div>
                 </motion.div>
-                <motion.div className="flex justify-around pt-10 ">
-                    <button className="hover:">
-                        <img src={image1} className="w-85 h-113.5" ></img>
-                    </button>
-                    <button>
-                        <img src={image2} className="w-85 h-113.5" ></img>
-                    </button>
-                    <button>
-                        <img src={image3} className="w-85 h-113.5"></img>
-                    </button>
-                    <button>
-                        <img src={image4} className="w-85 h-113.5" ></img>
-                    </button>
+                <motion.div className="grid grid-cols-4 gap-8 pt-10">
+                    {Data.slice(0, 4).map((Product) => (
+                        <button key={Product.id} onClick={() => navigate(`/product/${Product.id}`)} className="flex flex-col items-start gap-4">
+                            <img src={Product.images[0]} className="w-85 h-113.5 object-cover " />
+                            <div className={`grid grid-cols-2 w-85 font-outfit font-medium text-[1.20rem] ${theme === "#FF0000" ? "text-[#FF0000]" : theme === "#000000" ? "text-[#ECE9E4]" : "text-[#000000]"}`}>
+                                <p className="justify-self-start">{Product.name}</p>
+                                <p className="justify-self-end">{Product.price}</p>
+                            </div>
+                        </button>
+                    ))}
                 </motion.div>
 
             </motion.div>
