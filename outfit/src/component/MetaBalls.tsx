@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Renderer, Program, Mesh, Triangle, Transform, Vec3, Camera } from 'ogl';
 
 type MetaBallsProps = {
@@ -12,6 +12,12 @@ type MetaBallsProps = {
   cursorBallSize?: number;
   cursorBallColor?: string;
   enableTransparency?: boolean;
+  /** CSS selector for elements that, on hover, grow the cursor ball + show a label. */
+  hoverSelector?: string;
+  /** How much bigger the cursor ball gets while hovering an interactive element. */
+  hoverBallSize?: number;
+  /** Text shown inside the enlarged ball while hovering. */
+  hoverText?: string;
 };
 
 function parseHexColor(hex: string): [number, number, number] {
@@ -124,9 +130,17 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
   clumpFactor = 1,
   cursorBallSize = 3,
   cursorBallColor = '#ffffff',
-  enableTransparency = false
+  enableTransparency = false,
+  hoverSelector = 'button, a, [data-cursor-hover]',
+  hoverBallSize = 6,
+  hoverText = 'View More'
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  // Drives the DOM "View More" label that overlays the enlarged cursor ball.
+  const [label, setLabel] = useState({ visible: false, x: 0, y: 0 });
+  // Refs so the rAF loop can read the latest hover state without re-subscribing.
+  const hoveringRef = useRef(false);
+  const cursorClientRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -202,6 +216,8 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
     let pointerInside = false;
     let pointerX = 0;
     let pointerY = 0;
+    // Cursor ball radius is lerped toward this target so growth/shrink is smooth.
+    let currentCursorSize = cursorBallSize;
 
     function resize() {
       if (!container) return;
@@ -217,23 +233,42 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
 
     function onPointerMove(e: PointerEvent) {
       if (!enableMouseInteraction || !container) return;
+      pointerInside = true;
       const rect = container.getBoundingClientRect();
       const px = e.clientX - rect.left;
       const py = e.clientY - rect.top;
       pointerX = (px / rect.width) * gl.canvas.width;
       pointerY = (1 - py / rect.height) * gl.canvas.height;
-    }
-    function onPointerEnter() {
-      if (!enableMouseInteraction) return;
-      pointerInside = true;
+      cursorClientRef.current = { x: e.clientX, y: e.clientY };
     }
     function onPointerLeave() {
-      if (!enableMouseInteraction) return;
       pointerInside = false;
     }
-    container.addEventListener('pointermove', onPointerMove);
-    container.addEventListener('pointerenter', onPointerEnter);
-    container.addEventListener('pointerleave', onPointerLeave);
+    // Track hover over interactive elements anywhere on the page.
+    function onOver(e: Event) {
+      const target = e.target as Element | null;
+      if (target && target.closest(hoverSelector)) {
+        hoveringRef.current = true;
+        const { x, y } = cursorClientRef.current;
+        setLabel({ visible: true, x, y });
+      }
+    }
+    function onOut(e: Event) {
+      const target = e.target as Element | null;
+      const related = (e as MouseEvent).relatedTarget as Element | null;
+      if (
+        target &&
+        target.closest(hoverSelector) &&
+        !(related && related.closest(hoverSelector))
+      ) {
+        hoveringRef.current = false;
+        setLabel((l) => ({ ...l, visible: false }));
+      }
+    }
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('blur', onPointerLeave);
+    document.addEventListener('mouseover', onOver);
+    document.addEventListener('mouseout', onOut);
 
     const startTime = performance.now();
     let animationFrameId: number;
@@ -269,6 +304,17 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
       mouseBallPos.y += (targetY - mouseBallPos.y) * hoverSmoothness;
       program.uniforms.iMouse.value.set(mouseBallPos.x, mouseBallPos.y, 0);
 
+      // Smoothly grow/shrink the cursor ball when hovering a button.
+      const targetSize = hoveringRef.current ? hoverBallSize : cursorBallSize;
+      currentCursorSize += (targetSize - currentCursorSize) * 0.15;
+      program.uniforms.iCursorBallSize.value = currentCursorSize;
+
+      // Keep the "View More" label pinned to the cursor while it's visible.
+      if (hoveringRef.current) {
+        const { x, y } = cursorClientRef.current;
+        setLabel((l) => (l.x === x && l.y === y ? l : { visible: true, x, y }));
+      }
+
       renderer.render({ scene, camera });
     }
     animationFrameId = requestAnimationFrame(update);
@@ -276,9 +322,10 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resize);
-      container.removeEventListener('pointermove', onPointerMove);
-      container.removeEventListener('pointerenter', onPointerEnter);
-      container.removeEventListener('pointerleave', onPointerLeave);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('blur', onPointerLeave);
+      document.removeEventListener('mouseover', onOver);
+      document.removeEventListener('mouseout', onOut);
       container.removeChild(gl.canvas);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
@@ -292,10 +339,29 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
     ballCount,
     clumpFactor,
     cursorBallSize,
+    hoverBallSize,
+    hoverSelector,
     enableTransparency
   ]);
 
-  return <div ref={containerRef} className="w-full h-full absolute" />;
+  return (
+    <div
+      ref={containerRef}
+      className="w-screen h-screen fixed inset-0 z-50 pointer-events-none"
+    >
+      <span
+        className="fixed -translate-x-1/2 -translate-y-1/2 text-white text-xs font-bold uppercase tracking-widest text-center select-none transition-opacity duration-200"
+        style={{
+          left: label.x,
+          top: label.y,
+          opacity: label.visible ? 1 : 0,
+          mixBlendMode: 'difference'
+        }}
+      >
+        {hoverText}
+      </span>
+    </div>
+  );
 };
 
 export default MetaBalls;
