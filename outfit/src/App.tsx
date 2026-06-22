@@ -20,15 +20,17 @@ export default function App() {
                 <MetaBalls
                     color="#FF0000"
                     cursorBallColor="#FF0000"
-                    cursorBallSize={0.4}
+                    cursorBallSize={1}
+                    hoverBallSize={6}
+                    hoverText="View More"
                     ballCount={0}
                     animationSize={50}
                     enableMouseInteraction
                     enableTransparency={true}
-                    hoverSmoothness={0.054}
+                    hoverSmoothness={0.1}
                     clumpFactor={0}
-                    speed={0}
-                />  
+                    speed={0.3}
+                />
                 <NavBar theme={theme} setTheme={setTheme} />
                 <Routes>
                     <Route path='/' element={<Home theme={theme} />}></Route>
