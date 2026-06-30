@@ -1,16 +1,22 @@
 import { easeInOut, motion } from "motion/react"
-import { useNavigate } from "react-router-dom"
-import { Data } from "../data/data"
+import Cards from "../component/cards";
 
+
+type LabelState = {
+    visible: boolean;
+    x: number;
+    y: number;
+};
 
 type homeProps = {
     theme: string;
+    setLabel: React.Dispatch<React.SetStateAction<LabelState>>;
 }
 
 
-export default function Home({ theme }: homeProps) {
+export default function Home({ theme, setLabel }: homeProps) {
 
-    const navigate = useNavigate();
+
 
     const text = "O U T F I T";
     const parentProps = {
@@ -54,15 +60,9 @@ export default function Home({ theme }: homeProps) {
                     <div className="pl-10 text-nowrap mr-5">© 2026</div>
                 </motion.div>
                 <motion.div className="grid grid-cols-4 gap-8 pt-10">
-                    {Data.slice(0, 4).map((Product) => (
-                        <button key={Product.id} onClick={() => navigate(`/product/${Product.id}`)} className="flex flex-col items-start gap-4">
-                            <img src={Product.images[0]} className="w-85 h-113.5 object-cover " />
-                            <div className={`grid grid-cols-2 w-85 font-outfit font-medium text-[1.20rem] ${theme === "#FF0000" ? "text-[#FF0000]" : theme === "#000000" ? "text-[#ECE9E4]" : "text-[#000000]"}`}>
-                                <p className="justify-self-start">{Product.name}</p>
-                                <p className="justify-self-end">{Product.price}</p>
-                            </div>
-                        </button>
-                    ))}
+                    <>
+                        <Cards theme={theme} setLabel={setLabel} />
+                    </>
                 </motion.div>
 
             </motion.div>

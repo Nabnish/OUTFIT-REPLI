@@ -1,5 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Renderer, Program, Mesh, Triangle, Transform, Vec3, Camera } from 'ogl';
+import { useLocation } from "react-router-dom";
+
+type LabelState = {
+  visible: boolean;
+  x: number;
+  y: number;
+};
 
 type MetaBallsProps = {
   color?: string;
@@ -12,14 +19,13 @@ type MetaBallsProps = {
   cursorBallSize?: number;
   cursorBallColor?: string;
   enableTransparency?: boolean;
-  /** CSS selector for elements that, on hover, grow the cursor ball + show a label. */
   hoverSelector?: string;
-  /** How much bigger the cursor ball gets while hovering an interactive element. */
   hoverBallSize?: number;
-  /** Text shown inside the enlarged ball while hovering. */
+  label?:LabelState
+  setLabel?: React.Dispatch<React.SetStateAction<LabelState>>;
   hoverText?: string;
 };
-
+//visible: false, x: 0, y: 0
 function parseHexColor(hex: string): [number, number, number] {
   const c = hex.replace('#', '');
   const r = parseInt(c.substring(0, 2), 16) / 255;
@@ -131,13 +137,26 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
   cursorBallSize = 3,
   cursorBallColor = '#ffffff',
   enableTransparency = false,
-  hoverSelector = 'button, a, [data-cursor-hover]',
+  hoverSelector = ' Cards, [data-cursor-hover]',
   hoverBallSize = 6,
-  hoverText = 'View More'
+  hoverText = 'View More',
+  label: labelProp,
+  setLabel: setLabelProp
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  // Drives the DOM "View More" label that overlays the enlarged cursor ball.
-  const [label, setLabel] = useState({ visible: false, x: 0, y: 0 });
+  const [internalLabel, setInternalLabel] = useState<LabelState>({
+    visible: false,
+    x: 0,
+    y: 0
+  });
+  const label = labelProp ?? internalLabel;
+  const setLabel = setLabelProp ?? setInternalLabel;
+  const location = useLocation();
+  useEffect(() => {
+    hoveringRef.current = false;
+    setLabel((l) => ({ ...l, visible: false }));
+  }, [location.pathname]);
+
   // Refs so the rAF loop can read the latest hover state without re-subscribing.
   const hoveringRef = useRef(false);
   const cursorClientRef = useRef({ x: 0, y: 0 });
@@ -244,7 +263,6 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
     function onPointerLeave() {
       pointerInside = false;
     }
-    // Track hover over interactive elements anywhere on the page.
     function onOver(e: Event) {
       const target = e.target as Element | null;
       if (target && target.closest(hoverSelector)) {
@@ -261,7 +279,7 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
         target.closest(hoverSelector) &&
         !(related && related.closest(hoverSelector))
       ) {
-        hoveringRef.current = false;
+        hoveringRef.current = false; 
         setLabel((l) => ({ ...l, visible: false }));
       }
     }
@@ -304,12 +322,12 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
       mouseBallPos.y += (targetY - mouseBallPos.y) * hoverSmoothness;
       program.uniforms.iMouse.value.set(mouseBallPos.x, mouseBallPos.y, 0);
 
-      // Smoothly grow/shrink the cursor ball when hovering a button.
+      
       const targetSize = hoveringRef.current ? hoverBallSize : cursorBallSize;
       currentCursorSize += (targetSize - currentCursorSize) * 0.15;
       program.uniforms.iCursorBallSize.value = currentCursorSize;
 
-      // Keep the "View More" label pinned to the cursor while it's visible.
+      
       if (hoveringRef.current) {
         const { x, y } = cursorClientRef.current;
         setLabel((l) => (l.x === x && l.y === y ? l : { visible: true, x, y }));
@@ -324,8 +342,8 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
       window.removeEventListener('resize', resize);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('blur', onPointerLeave);
-      document.removeEventListener('mouseover', onOver);
-      document.removeEventListener('mouseout', onOut);
+      document.removeEventListener("mouseover", onOver);
+      document.removeEventListener("mouseout", onOut);
       container.removeChild(gl.canvas);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
@@ -341,7 +359,8 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
     cursorBallSize,
     hoverBallSize,
     hoverSelector,
-    enableTransparency
+    enableTransparency,
+    setLabel
   ]);
 
   return (
@@ -365,3 +384,4 @@ const MetaBalls: React.FC<MetaBallsProps> = ({
 };
 
 export default MetaBalls;
+

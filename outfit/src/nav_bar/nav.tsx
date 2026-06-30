@@ -9,7 +9,7 @@ export default function NavBar({ theme, setTheme }: { theme: string; setTheme: (
         setTheme(theme);
     }
 
-    const [bag] = useState(0);
+    const [bag,setBag] = useState(0);
     
    const navi=useNavigate();
 

@@ -10,7 +10,8 @@ import Product from './product/prod';
 
 export default function App() {
     const [theme, setTheme] = useState<string>("#FF0000");
-
+    
+    const [label, setLabel] = useState({ visible: false, x: 0, y: 0 });
 
     return (
         <>
@@ -20,9 +21,11 @@ export default function App() {
                 <MetaBalls
                     color="#FF0000"
                     cursorBallColor="#FF0000"
-                    cursorBallSize={1}
-                    hoverBallSize={6}
+                    cursorBallSize={0.45}
+                    hoverBallSize={4}
                     hoverText="View More"
+                    label={label}
+                    setLabel={setLabel}
                     ballCount={0}
                     animationSize={50}
                     enableMouseInteraction
@@ -33,7 +36,7 @@ export default function App() {
                 />
                 <NavBar theme={theme} setTheme={setTheme} />
                 <Routes>
-                    <Route path='/' element={<Home theme={theme} />}></Route>
+                    <Route path='/' element={<Home theme={theme} setLabel={setLabel} />}></Route>
                     <Route path='/product/:id' element={<Product theme={theme} />}></Route>
                 </Routes >
             </BrowserRouter>
